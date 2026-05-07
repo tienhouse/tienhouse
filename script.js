@@ -62,18 +62,25 @@ async function initApp() {
               const totalStock = parseInt(row.stock) || 0;
               const sold = parseInt(row.sold) || 0;
 
-              return {
-                id: parseInt(row.id),
-                name: row.name || "Sản phẩm không tên",
-                code: row.code || `SP.${row.id}`,
-                price: priceNum.toLocaleString('vi-VN') + "₫",
-                priceNum: priceNum,
-                oldPrice: row.oldPrice ? row.oldPrice.trim() : "",
-                sale: row.oldPrice ? true : false,
-                img: imgs[0],
-                images: imgs,
-                category: row.category ? row.category.trim() : "Mới",
-                requiresModel: String(row.requiresModel).toUpperCase() === 'TRUE',
+                let rawCat = row.category ? row.category.trim().toLowerCase() : "";
+                let finalCat = "Mới";
+                if (rawCat.includes("ốp") || rawCat.includes("op")) finalCat = "Ốp Lưng";
+                else if (rawCat.includes("móc") || rawCat.includes("moc") || rawCat.includes("khóa") || rawCat.includes("khoá")) finalCat = "Móc Khoá";
+                else if (rawCat.includes("quà") || rawCat.includes("qua") || rawCat.includes("lưu") || rawCat.includes("niệm")) finalCat = "Quà Lưu Niệm";
+                else if (rawCat !== "") finalCat = "Mới";
+
+                return {
+                  id: parseInt(row.id),
+                  name: row.name || "Sản phẩm không tên",
+                  code: row.code || `SP.${row.id}`,
+                  price: priceNum.toLocaleString('vi-VN') + "₫",
+                  priceNum: priceNum,
+                  oldPrice: row.oldPrice ? row.oldPrice.trim() : "",
+                  sale: row.oldPrice ? true : false,
+                  img: imgs[0],
+                  images: imgs,
+                  category: finalCat,
+                  requiresModel: String(row.requiresModel).toUpperCase() === 'TRUE',
                 description: row.description || "Đang cập nhật mô tả...",
                 stock: totalStock,
                 sold: sold
