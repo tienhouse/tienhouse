@@ -1,0 +1,100 @@
+{
+  "name": "TienHouseTelegram",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "don-hang-tien-house",
+        "options": {}
+      },
+      "id": "deed5906-c191-40d6-a3e4-4d000136830a",
+      "name": "Nhận Đơn Hàng Từ Web",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -64
+      ],
+      "webhookId": "tien-house-webhook-id"
+    },
+    {
+      "parameters": {
+        "chatId": "7922740418",
+        "text": "=🚨 <b>ĐƠN HÀNG MỚI - TIÊN HOUSE</b> 🚨\n\n👤 <b>Khách hàng:</b> {{ $json.body.customerName }}\n📞 <b>Số điện thoại:</b> {{ $json.body.phone }}\n📍 <b>Địa chỉ:</b> {{ $json.body.address }}\n⏰ <b>Thời gian:</b> {{ $json.body.orderTime }}\n\n🛒 <b>CHI TIẾT ĐƠN HÀNG:</b>\n{{ $json.body.items }}\n\n💰 <b>TỔNG CỘNG: {{ $json.body.totalAmount }}</b>",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "cd566147-fe6f-4b3c-8f76-c889d38ea3b3",
+      "name": "Gửi Bot Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        224,
+        32
+      ],
+      "webhookId": "6914513d-cac1-4808-aebf-13449819712d",
+      "credentials": {
+        "telegramApi": {
+          "id": "SMTnqruscu8fAF8i",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "trachuusinh060396@gmail.com",
+        "toEmail": "trachuusinh060396@gmail.com",
+        "subject": "=🎉 Đơn hàng Tiên House: {{$json.body.customerName}} - {{$json.body.totalAmount}}",
+        "html": "=<div style=\"font-family: sans-serif; line-height: 1.6;\">\n  <h2 style=\"color: #ff9a9e;\">🎉 Đơn Hàng Mới Từ Tiên House</h2>\n  <hr style=\"border: 1px solid #eee;\">\n  \n  <h3 style=\"color: #333;\">👤 THÔNG TIN KHÁCH HÀNG:</h3>\n  <ul style=\"list-style-type: none; padding-left: 0;\">\n    <li><b>Tên:</b> {{$json.body.customerName}}</li>\n    <li><b>SĐT:</b> {{$json.body.phone}}</li>\n    <li><b>Địa chỉ:</b> {{$json.body.address}}</li>\n    <li><b>Thời gian:</b> {{$json.body.orderTime}}</li>\n  </ul>\n  \n  <h3 style=\"color: #333;\">📦 CHI TIẾT SẢN PHẨM:</h3>\n  <pre style=\"background: #fdfdfd; padding: 15px; border-radius: 8px; font-family: sans-serif; border: 1px solid #ddd; white-space: pre-wrap;\">{{$json.body.items}}</pre>\n  \n  <h2 style=\"color: #e74c3c;\">💰 TỔNG THU: {{$json.body.totalAmount}}</h2>\n</div>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        224,
+        -160
+      ],
+      "id": "5c945518-c5ad-41bd-938f-8f1b17943651",
+      "name": "Send an Email",
+      "webhookId": "f6da5f12-e898-4d55-848e-710833b28dab",
+      "credentials": {
+        "smtp": {
+          "id": "9Ew9oMW9o53N1hIb",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Nhận Đơn Hàng Từ Web": {
+      "main": [
+        [
+          {
+            "node": "Gửi Bot Telegram",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send an Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "15f45afa-15b0-4cc6-a36c-8b4b3923211e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cc323c5f426cf846230cf5dd17cd7831d58b7af8c92227ab51ba1db016549ee6"
+  },
+  "id": "wAXeBfradNFGc2V7",
+  "tags": []
+}
