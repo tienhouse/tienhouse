@@ -55,33 +55,46 @@ async function initApp() {
           download: true, header: true, skipEmptyLines: true,
           complete: function(results) {
             products = results.data.filter(row => row.id).map(row => {
-              const priceNum = parseInt(row.priceNum) || 0;
+              const rawPrice = row['Giá'] || row.priceNum || "0";
+              const priceNum = parseInt(String(rawPrice).replace(/\D/g, '')) || 0;
+              
               let imgs = [];
-              if (row.img) imgs = row.img.split(',').map(url => url.trim()).filter(url => url);
+              const rawImg = row['Ảnh'] || row.img;
+              if (rawImg) imgs = rawImg.split(',').map(url => url.trim()).filter(url => url);
               if (imgs.length === 0) imgs = ["product_image.jpg"];
-              const totalStock = parseInt(row.stock) || 0;
-              const sold = parseInt(row.sold) || 0;
+              
+              const totalStock = parseInt(row['hàng tồn kho'] || row.stock) || 0;
+              const sold = parseInt(row['hàng đã bán'] || row.sold) || 0;
 
-                let rawCat = row.category ? row.category.trim().toLowerCase() : "";
-                let finalCat = "Mới";
-                if (rawCat.includes("ốp") || rawCat.includes("op")) finalCat = "Ốp Lưng";
-                else if (rawCat.includes("móc") || rawCat.includes("moc") || rawCat.includes("khóa") || rawCat.includes("khoá")) finalCat = "Móc Khoá";
-                else if (rawCat.includes("quà") || rawCat.includes("qua") || rawCat.includes("lưu") || rawCat.includes("niệm")) finalCat = "Quà Lưu Niệm";
-                else if (rawCat !== "") finalCat = "Mới";
+              let rawCode = (row.Code || row.code || "").trim().toUpperCase();
+              let finalCat = "Mới";
+              if (rawCode.includes("OP")) finalCat = "Ốp Lưng";
+              else if (rawCode.includes("MK")) finalCat = "Móc Khoá";
+              else if (rawCode.includes("QL")) finalCat = "Quà Lưu Niệm";
+              
+              let chiTiet = (row['Chi Tiết'] || "").trim().toLowerCase();
+              let isNew = chiTiet === "mới";
+              let oldPrice = (row['Giảm Giá'] || row.oldPrice || "").trim();
+              let isSale = chiTiet === "sale" || oldPrice !== "";
 
-                return {
-                  id: parseInt(row.id),
-                  name: row.name || "Sản phẩm không tên",
-                  code: row.code || `SP.${row.id}`,
-                  price: priceNum.toLocaleString('vi-VN') + "₫",
-                  priceNum: priceNum,
-                  oldPrice: row.oldPrice ? row.oldPrice.trim() : "",
-                  sale: row.oldPrice ? true : false,
-                  img: imgs[0],
-                  images: imgs,
-                  category: finalCat,
-                  requiresModel: String(row.requiresModel).toUpperCase() === 'TRUE',
-                description: row.description || "Đang cập nhật mô tả...",
+              let name = row['Sản Phẩm'] || row.name || "Sản phẩm không tên";
+              let code = row.Code || row.code || `SP.${row.id}`;
+              let requiresModel = finalCat === "Ốp Lưng";
+
+              return {
+                id: parseInt(row.id),
+                name: name,
+                code: code,
+                price: priceNum.toLocaleString('vi-VN') + "₫",
+                priceNum: priceNum,
+                oldPrice: oldPrice,
+                sale: isSale,
+                isNew: isNew,
+                img: imgs[0],
+                images: imgs,
+                category: finalCat,
+                requiresModel: requiresModel,
+                description: row.description || "Sản phẩm chất lượng từ Tiên House.",
                 stock: totalStock,
                 sold: sold
               };
@@ -110,7 +123,7 @@ function generateProductHTML(p) {
   
   return `
     <div class="product-card" onclick="openProductModal(${p.id})">
-      ${p.category === 'Mới' ? '<span class="tag-new">MỚI ✨</span>' : ''}
+      ${(p.isNew || p.category === 'Mới') ? '<span class="tag-new">MỚI ✨</span>' : ''}
       ${p.sale ? '<span class="tag-sale">SALE 🔥</span>' : ''}
       <div class="product-img">
         <div class="product-like-badge card-like-${p.id}" style="display:none;"><i class="fa-solid fa-heart"></i> <span>0</span></div>
