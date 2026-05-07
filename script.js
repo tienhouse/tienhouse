@@ -494,15 +494,30 @@ document.getElementById('checkoutForm').addEventListener('submit', function(e) {
   const totalMoney = cart.reduce((sum, item) => sum + (item.priceNum * item.quantity), 0);
   const itemsText = cart.map((item, i) => {
     const m = item.requiresModel ? ` | Model: ${item.model}` : '';
-    return `${i+1}. [${item.code}] ${item.name}${m} | SL: ${item.quantity} | Giá: ${formatCurrency(item.priceNum)}\n   -> Chi tiết: ${item.description}`;
+    return `${i+1}. [${item.code}] ${item.name}${m} | SL: ${item.quantity} | Giá: ${formatCurrency(item.priceNum)}`;
   }).join('\n');
+
+  const formattedOrder = `🛍️ ĐƠN HÀNG MỚI TỪ TIÊN HOUSE
+-----------------------------------
+👤 Khách hàng: ${custName}
+📱 Số điện thoại: ${custPhone}
+📧 Email: ${custEmail ? custEmail : 'Không có'}
+📍 Địa chỉ: ${custAddress}, ${custDistrict}, ${custProvince}
+📝 Ghi chú: ${custNote ? custNote : 'Không có'}
+-----------------------------------
+📦 DANH SÁCH SẢN PHẨM:
+${itemsText}
+-----------------------------------
+💰 TỔNG CỘNG: ${formatCurrency(totalMoney)}
+🕒 Thời gian: ${new Date().toLocaleString('vi-VN')}`;
 
   const orderData = {
     customerName: custName, phone: custPhone, email: custEmail,
     province: custProvince, district: custDistrict,
     address: custAddress, note: custNote,
     totalAmount: formatCurrency(totalMoney),
-    items: itemsText, orderTime: new Date().toLocaleString('vi-VN'), rawCart: cart
+    items: itemsText, orderTime: new Date().toLocaleString('vi-VN'), rawCart: cart,
+    fullMessage: formattedOrder
   };
 
   closeCheckoutModal();
