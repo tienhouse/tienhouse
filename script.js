@@ -613,26 +613,36 @@ function updateLoginUI() {
 
 function handleGoogleLogin() {
   if (typeof google === 'undefined') { alert('Google Sign-In đang tải, vui lòng thử lại!'); return; }
-  google.accounts.id.initialize({
-    client_id: '852386350152-713354qvcnie2sqfkjeambda44j45jgf.apps.googleusercontent.com',
-    callback: handleCredentialResponse,
-    auto_select: false
-  });
-  google.accounts.id.prompt();
-}
-
-function handleCredentialResponse(response) {
-  const base64Url = response.credential.split('.')[1];
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-  }).join(''));
   
-  const payload = JSON.parse(jsonPayload);
-  currentUser = { name: payload.name, email: payload.email, picture: payload.picture, sub: payload.sub };
-  localStorage.setItem('tienhouse_user', JSON.stringify(currentUser));
-  updateLoginUI();
-  if (currentSelectedProduct) loadProductInteractions(currentSelectedProduct.id);
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: '852386350152-713354qvcnie2sqfkjeambda44j45jgf.apps.googleusercontent.com',
+    scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+    callback: (tokenResponse) => {
+      if (tokenResponse && tokenResponse.access_token) {
+        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+        })
+        .then(res => res.json())
+        .then(payload => {
+          currentUser = { 
+            name: payload.name, 
+            email: payload.email, 
+            picture: payload.picture, 
+            sub: payload.sub 
+          };
+          localStorage.setItem('tienhouse_user', JSON.stringify(currentUser));
+          updateLoginUI();
+          if (currentSelectedProduct) loadProductInteractions(currentSelectedProduct.id);
+        })
+        .catch(err => {
+          console.error('Lỗi lấy thông tin user:', err);
+          alert('Có lỗi xảy ra khi lấy thông tin. Vui lòng thử lại.');
+        });
+      }
+    },
+  });
+  
+  client.requestAccessToken();
 }
 
 function handleLogout() {
