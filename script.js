@@ -617,7 +617,7 @@ function updateLoginUI() {
 // Khởi tạo Facebook SDK
 window.fbAsyncInit = function() {
   FB.init({
-    appId      : '968725206028342', // Facebook App ID của TienHouse
+    appId      : '1634423781107098', // Facebook App ID của TienHouse (App Mới)
     cookie     : true,
     xfbml      : true,
     version    : 'v19.0'
