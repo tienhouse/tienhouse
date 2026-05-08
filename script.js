@@ -126,7 +126,10 @@ function generateProductHTML(p) {
       ${(p.isNew || p.category === 'Mới') ? '<span class="tag-new">MỚI ✨</span>' : ''}
       ${p.sale ? '<span class="tag-sale">SALE 🔥</span>' : ''}
       <div class="product-img">
-        <div class="product-like-badge card-like-${p.id}" style="display:none;"><i class="fa-solid fa-heart"></i> <span>0</span></div>
+        <div class="product-badges-bottom">
+          <div class="product-comment-badge card-comment-${p.id}" style="display:none;"><i class="fa-solid fa-comment-dots"></i> <span>0</span></div>
+          <div class="product-like-badge card-like-${p.id}" style="display:none;"><i class="fa-solid fa-heart"></i> <span>0</span></div>
+        </div>
         <img src="${p.img}" alt="${p.name}" loading="lazy">
         ${isOutOfStock ? '<div class="out-of-stock-overlay">HẾT HÀNG</div>' : ''}
       </div>
@@ -173,7 +176,7 @@ function renderAllProducts(productList) {
     if (section) section.style.display = items.length > 0 ? 'block' : 'none';
   }
   document.getElementById('no-results').style.display = productList.length === 0 ? 'block' : 'none';
-  listenToCardLikes(productList);
+  listenToCardInteractions(productList);
 }
 
 // ===== TÌM KIẾM =====
@@ -752,17 +755,33 @@ document.getElementById('commentInput').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') postComment();
 });
 
-// Sync likes on product cards
+// Sync likes and comments on product cards
 const listeningProducts = new Set();
-function listenToCardLikes(productList) {
+function listenToCardInteractions(productList) {
   if (typeof database === 'undefined') return;
   productList.forEach(p => {
     if (!listeningProducts.has(p.id)) {
       listeningProducts.add(p.id);
+      
+      // Listen for likes
       database.ref(`products/${p.id}/likes`).on('value', snap => {
         const likes = snap.val() || {};
         const count = Object.keys(likes).length;
         document.querySelectorAll(`.card-like-${p.id}`).forEach(el => {
+          if (count > 0) {
+            el.style.display = 'flex';
+            el.querySelector('span').textContent = count;
+          } else {
+            el.style.display = 'none';
+          }
+        });
+      });
+      
+      // Listen for comments
+      database.ref(`products/${p.id}/comments`).on('value', snap => {
+        const comments = snap.val() || {};
+        const count = Object.keys(comments).length;
+        document.querySelectorAll(`.card-comment-${p.id}`).forEach(el => {
           if (count > 0) {
             el.style.display = 'flex';
             el.querySelector('span').textContent = count;
